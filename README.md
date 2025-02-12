@@ -1,6 +1,9 @@
 # ganymede
 PCAP Parser
 
+### Pull the code download
+git clone git@github.com:ssgeejr/ganymede.git -b develop
+
 
 setup Instructions:
 
