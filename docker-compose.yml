@@ -1,0 +1,18 @@
+
+services:
+    ceres:
+        image: mysql:8.0.25
+        container_name: ganymededb
+        restart: always
+        environment:
+            MYSQL_DATABASE: 'ganymededb'
+            MYSQL_USER: 'jupiters'
+            MYSQL_PASSWORD: 'icymoon'
+            MYSQL_ROOT_PASSWORD: 'twilightzone'
+        security_opt:
+            - seccomp:unconfined
+        volumes:
+            - ./mysql:/docker-entrypoint-initdb.d/:ro
+            - /opt/apps/ganymededb:/var/lib/mysql
+        ports:
+            - 3306:3306
