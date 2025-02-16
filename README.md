@@ -86,3 +86,8 @@ pip install scapy pyshark mysql-connector-python
 
 
 
+## FISHNECK Modules
+
+
+pip install scapy ipwhois netaddr
+
