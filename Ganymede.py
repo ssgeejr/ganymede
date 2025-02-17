@@ -34,8 +34,14 @@ class PCAPParser:
             print(f'parsing pcap file {self.pcapfile}')
             ###--Insert your code here
 
+            if self.kingdom:
+                print(f"Kingdom: {self.kingdom}")
+
         except mysql.connector.Error as err:
             print(f"MySQL Error: {err}")  # Captures MySQL-specific errors
+
+        if self.db_connection:
+            self.db_connection.commit()
 
         self.db_connection.commit()
         print(f"New Hosts: {self.total_hosts}")
@@ -73,4 +79,8 @@ class PCAPParser:
 
 
 if __name__ == '__main__':
-    PCAPParser().process(sys.argv[1:])
+    parser = PCAPParser()
+    parser.process(sys.argv[1:])
+    parser.connect_to_db()
+    parser.parsePCAPFile()
+    parser.close_db_connection()
