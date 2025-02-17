@@ -13,6 +13,7 @@ class PCAPParser:
         self.open_ports = 0
         self.parseOnly = False
         self.pcapfile = None
+        self.kingdom = None
 
     def connect_to_db(self):
         try:
@@ -49,7 +50,7 @@ class PCAPParser:
     def process(self, argv):
 
         try:
-            opts, args = getopt.getopt(argv, "f:")
+            opts, args = getopt.getopt(argv, "f:k:")
         except getopt.GetoptError as e:
             print('>>>> ERROR: %s' % str(e))
             sys.exit(2)
@@ -57,15 +58,21 @@ class PCAPParser:
             if opt == '-h':
                 print('Ganymede.py -h Help Message')
                 print('Ganymede.py -f {pcap file}')
+                print('Ganymede.py -k {kingdom}')
                 sys.exit()
             elif opt in "-x":
                 self.parseOnly = True
             elif opt in "-f":
                 self.pcapfile = arg
+            elif opt in "-k":
+                self.kingdom = arg
 
         if not self.pcapfile:
             print('Missing filename ...')
             sys.exit(-1)
+
+        if self.kingdom:
+            print(f'Processing kingdom: {self.kingdom}')
 
 
 if __name__ == '__main__':
