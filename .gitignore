@@ -8,6 +8,7 @@ __pycache__/
 
 #test files 
 *.pcap
+*.nmap
 
 
 # Distribution / packaging
