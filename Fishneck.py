@@ -16,7 +16,7 @@ def get_local_ip():
         return None
 
 def is_local(ip, local_subnet):
-    """Check if an IP belongs to the local subnet."""
+    """Check if an IP belongs to the user-specified local subnet."""
     return IPAddress(ip) in IPNetwork(local_subnet)
 
 def extract_servers_and_ports(pcap_file, local_subnet, scan_ports=True):
@@ -34,7 +34,7 @@ def extract_servers_and_ports(pcap_file, local_subnet, scan_ports=True):
             src_port = pkt[TCP].sport if TCP in pkt else (pkt[UDP].sport if UDP in pkt else None)
             dst_port = pkt[TCP].dport if TCP in pkt else (pkt[UDP].dport if UDP in pkt else None)
 
-            # Ignore localhost scanning IP
+            # Ignore the scanning host
             if src_ip == scanning_host_ip or dst_ip == scanning_host_ip:
                 continue
 
@@ -64,7 +64,7 @@ def whois_lookup(ip):
     except Exception:
         return "WHOIS lookup failed"
 
-def generate_report(local_servers, external_comms, open_ports, scan_ports=True, do_whois=True):
+def generate_report(local_servers, external_comms, open_ports, local_subnet, scan_ports=True, do_whois=True):
     """Generate the final report."""
     output = []
 
@@ -77,7 +77,7 @@ def generate_report(local_servers, external_comms, open_ports, scan_ports=True, 
     for server, external_ips in external_comms.items():
         output.append(f"\n{server} communicates with:")
         for ip, port in external_ips:
-            if do_whois and not is_local(ip, LOCAL_SUBNET):
+            if do_whois and not is_local(ip, local_subnet):  # FIXED: Using local_subnet, not DEFAULT_LOCAL_SUBNET
                 whois_info = whois_lookup(ip)
                 output.append(f"  - {ip}:{port} ({whois_info})")
             else:
@@ -103,7 +103,7 @@ def main():
     local_servers, external_comms, open_ports = extract_servers_and_ports(args.pcap_file, local_subnet, scan_ports)
 
     # Generate report
-    report = generate_report(local_servers, external_comms, open_ports, scan_ports, do_whois)
+    report = generate_report(local_servers, external_comms, open_ports, local_subnet, scan_ports, do_whois)
 
     # Output to file or console
     if output_file:
