@@ -44,9 +44,9 @@ class PCAPParser:
                 # Use destination IP as server IP (adjust if needed)
                 server_ip = packet.ip.dst
 
-                # Initialize the set of ports if not seen before
-                if server_ip not in servers:
-                    servers[server_ip] = set()
+                ip_addr = packet.ip.dst  # Using destination IP as server IP
+                if ip_addr not in servers:
+                    servers[ip_addr] = {'TCP': set(), 'UDP': set()}
 
                 # Check for TCP layer ports
                 if 'TCP' in packet:
@@ -69,6 +69,56 @@ class PCAPParser:
         except Exception as err:
             print(f"Error during PCAP parsing: {err}")
             return
+
+            #DB insertion
+
+        try:
+            cursor = self.db_cursor
+            # Create a new record in kingdom table and get kingdom_id
+            cursor.execute("INSERT INTO kingdom (name) VALUES (%s)", (self.kingdom,))
+            kingdom_id = cursor.lastrowid
+            print(f"New kingdom id: {kingdom_id}")
+
+            # For every server IP, insert into landscape and then for each port, insert into ports table.
+            for ip, protocols in servers.items():
+                # Attempt to get hostname via reverse DNS lookup
+                try:
+                    hostname = socket.gethostbyaddr(ip)[0]
+                except Exception:
+                    hostname = None
+                hostname = packet.dns.resp_name if hasattr(packet, 'dns') and hasattr(packet.dns, 'resp_name') else None
+
+                if hostname is None:
+                    hostname = "UNKNOWN"
+
+                cursor.execute(
+                    "INSERT INTO landscape (kingdom_id, ip, hostname) VALUES (%s, %s, %s)",
+                    (kingdom_id, ip, hostname)
+                )
+                landscape_id = cursor.lastrowid
+                print(f"Inserted landscape record for IP {ip} with id {landscape_id}")
+
+                # For every open TCP port:
+                for port in sorted(protocols.get('TCP', [])):
+                    cursor.execute(
+                        "INSERT INTO ports (landscape_id, port, protocol) VALUES (%s, %s, %s)",
+                        (landscape_id, port, 'TCP')
+                    )
+                    print(f"Inserted TCP port {port} for landscape id {landscape_id}")
+
+                # For every open UDP port:
+                for port in sorted(protocols.get('UDP', [])):
+                    cursor.execute(
+                        "INSERT INTO ports (landscape_id, port, protocol) VALUES (%s, %s, %s)",
+                        (landscape_id, port, 'UDP')
+                    )
+                    print(f"Inserted UDP port {port} for landscape id {landscape_id}")
+
+            # Commit all the changes
+            self.db_connection.commit()
+        except mysql.connector.Error as err:
+            print(f"MySQL Error: {err}")
+            self.db_connection.rollback()
 
         # Print each server's IP, its hostname (if available) and list of open ports
         print("\n--- Server Information ---")
