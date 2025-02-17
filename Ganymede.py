@@ -71,9 +71,6 @@ class PCAPParser:
             print('Missing filename ...')
             sys.exit(-1)
 
-        if self.kingdom:
-            print(f'Processing kingdom: {self.kingdom}')
-
 
 if __name__ == '__main__':
     PCAPParser().process(sys.argv[1:])
