@@ -62,10 +62,14 @@ class PCAPParser:
                 self.parseOnly = True
             elif opt in "-f":
                 self.pcapfile = arg
+        
+        print(self.pcapfile)
 
         if not self.pcapfile:
             print('Missing filename ...')
             sys.exit(-1)
+            
+        self.parsePCAPFile()
 
 
 if __name__ == '__main__':

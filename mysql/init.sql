@@ -9,14 +9,13 @@ CREATE TABLE kingdom (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE landscape (
     landscape_id INT AUTO_INCREMENT PRIMARY KEY,
-	kingdom_id INT NOT NULL,
+    kingdom_id INT NOT NULL,
     ip VARCHAR(39) NOT NULL,
     hostname VARCHAR(64) NOT NULL DEFAULT 'N/A',
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	FOREIGN KEY (kingdom_id) REFERENCES landscape(landscape_id) ON DELETE CASCADE
+    FOREIGN KEY (kingdom_id) REFERENCES kingdom(kingdom_id) ON DELETE CASCADE
 );
 
 CREATE TABLE ports (
@@ -26,6 +25,7 @@ CREATE TABLE ports (
     protocol VARCHAR(3) NOT NULL DEFAULT 'TCP',
     FOREIGN KEY (landscape_id) REFERENCES landscape(landscape_id) ON DELETE CASCADE
 );
+
 
 
 
