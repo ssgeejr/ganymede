@@ -1,6 +1,7 @@
 import pandas as pd
-import sys, csv, getopt, mysql.connector
+import sys, csv, getopt, mysql.connector, socket
 from datetime import datetime
+import pyshark
 from Astroidbelt import DwarfMoon
 
 #testt
@@ -30,22 +31,62 @@ class PCAPParser:
             exit(1)
 
     def parsePCAPFile(self):
+        # Dictionaries to hold server info: server_ip -> set(ports)
+        servers = {}
         try:
-            print(f'parsing pcap file {self.pcapfile}')
-            ###--Insert your code here
+            print(f'Parsing pcap file: {self.pcapfile}')
+            capture = pyshark.FileCapture(self.pcapfile)
+            for packet in capture:
+                # Process only packets that have an IP layer
+                if 'IP' not in packet:
+                    continue
 
-            if self.kingdom:
-                print(f"Kingdom: {self.kingdom}")
+                # Use destination IP as server IP (adjust if needed)
+                server_ip = packet.ip.dst
 
-        except mysql.connector.Error as err:
-            print(f"MySQL Error: {err}")  # Captures MySQL-specific errors
+                # Initialize the set of ports if not seen before
+                if server_ip not in servers:
+                    servers[server_ip] = set()
 
-        if self.db_connection:
-            self.db_connection.commit()
+                # Check for TCP layer ports
+                if 'TCP' in packet:
+                    try:
+                        # Using source and destination ports; here we assume destination port is "open"
+                        port = int(packet.tcp.dstport)
+                        servers[server_ip].add(port)
+                    except AttributeError:
+                        pass  # skip if attribute is missing
 
-        self.db_connection.commit()
-        print(f"New Hosts: {self.total_hosts}")
-        print(f"Total Open Ports: {self.open_ports}")
+                # Check for UDP layer ports
+                if 'UDP' in packet:
+                    try:
+                        port = int(packet.udp.dstport)
+                        servers[server_ip].add(port)
+                    except AttributeError:
+                        pass
+
+            capture.close()
+        except Exception as err:
+            print(f"Error during PCAP parsing: {err}")
+            return
+
+        # Print each server's IP, its hostname (if available) and list of open ports
+        print("\n--- Server Information ---")
+        for ip, ports in servers.items():
+            try:
+                # Attempt reverse DNS lookup
+                hostname = socket.gethostbyaddr(ip)[0]
+            except Exception:
+                hostname = "Hostname not available"
+            print(f"Server IP: {ip}")
+            print(f"Hostname: {hostname}")
+            if ports:
+                print("Open Ports:")
+                for port in sorted(ports):
+                    print(f"  - {port}")
+            else:
+                print("No open ports detected.")
+            print("-" * 30)
 
     def close_db_connection(self):
         if self.db_cursor:
