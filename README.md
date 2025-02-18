@@ -3,10 +3,8 @@ PCAP Parser
 
 
 ##  Project Outline 
-For the deepest possible scan of your local network, you can use the following nmap command:
-Having a valid pcap file, the Ganymede application will parse the file and load it into the database.
-This will be used to map the network. 
-
+Having a valid nmap output file, the Ganymede application will parse the file and load it into the database.
+This will be used to map the network and show up where it lives and what's listening
 
 Kingdom can only exist once in the kingdom table
 Each kingdom will have multiple servers
@@ -14,8 +12,6 @@ each server will have multiple ports
 
 Simple I hope - this should be much easier and faster than a pcap file - we're going to come back to it in teh second half of this program, so don't loose your code. 
 We will use the pcap file to map all these servers egress connections 
-
-
 
 ### Commands and software details
 

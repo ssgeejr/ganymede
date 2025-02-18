@@ -1,6 +1,9 @@
-SET GLOBAL time_zone = 'America/Chicago';
 
 USE ganymededb;
+
+drop table ports;
+drop table landscape;
+drop table kingdom;
 
 CREATE TABLE kingdom (
     kingdom_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -26,9 +29,3 @@ CREATE TABLE ports (
     service varchar(32) NOT NULL DEFAULT 'N/A',
     FOREIGN KEY (landscape_id) REFERENCES landscape(landscape_id) ON DELETE CASCADE
 );
-
-
-
-
-
-
