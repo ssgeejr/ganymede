@@ -6,6 +6,10 @@ PCAP Parser
 Having a valid nmap output file, the Ganymede application will parse the file and load it into the database.
 This will be used to map the network and show up where it lives and what's listening
 
+For your code -->  ALL you have to do is start coding in the NMAPParser.py file under the process 'def parse_file(self, filename, store_results):'
+Everythign else is managed for you, this makes it HIGHLY reusable for processing any type of file format and improves our speed and successrate for multiple files and formats 
+
+
 Kingdom can only exist once in the kingdom table
 Each kingdom will have multiple servers
 each server will have multiple ports 
